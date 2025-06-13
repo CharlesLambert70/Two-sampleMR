@@ -7,6 +7,7 @@ library(data.table)
 library(dplyr)
 library(tidyr)
 library(stringr)
+library(coloc)
 
 #load instrumental variables for exposures
 T2DGGI_SNPs = read.csv("./T2DGGI_SNPs.csv", header = TRUE)  
@@ -138,6 +139,46 @@ dat<-subset(dat, F.exposure>10) # filter out weak instrumental variables
   #scatterplot
   res <- mr(dat)
   mr_scatter_plot(res, dat)
+
+#colocalization analysis
+T2DGGI_EUR<-fread("./EUR_Metal_LDSC-CORR_Neff.v2.txt", sep='\t', header = TRUE) 
+CIR_EUR<-fread("./meta1cir.filthetmafn.rsid.selectedcolumns", sep='\t',header = TRUE)
+CIR_EUR<-separate_wider_delim(CIR_EUR, cols = MarkerName, delim = ":", names = c("CHR", "BP"),cols_remove=F)
+ISI_adj_EUR<-fread("./MAGIC_postchallengeIR_ISI_adjBMI_EUR.tsv.gz", sep='\t',header = TRUE)
+
+SNPs<-read.table("clipboard",sep='\t',header=TRUE)
+result_coloc<-data.frame()
+for (i in rownames(SNPs)){
+data1<-T2DGGI_EUR%>% filter(Chromsome==SNPs[i,'CHR'],Position >=SNPs[i,'BP']-500000,Position <= SNPs[i,'BP']+500000)
+data2<-NG2019_BW_FE_EF_EUR%>% filter(chr==SNPs[i,'CHR'],pos >=SNPs[i,'BP']-500000,pos <= SNPs[i,'BP']+500000)
+data1$chr_pos<-paste(data1$Chromsome,data1$Position,sep=':')
+data = merge(data1,data2,by.x='chr_pos',by.y="chr_pos")
+data = data[!duplicated(data$chr_pos),]
+data$ea<-toupper(data$ea)
+data$nea<-toupper(data$nea)
+data = data %>% filter((EffectAllele==ea & NonEffectAllele==nea)|(EffectAllele==nea & NonEffectAllele==ea)) 
+data=data%>%mutate(beta.y=ifelse(EffectAllele==ea,beta,-beta))
+data$VAR.x = data$SE^2
+data$VAR.y = data$se^2
+data = data[data$VAR.x!=0 & data$VAR.y!=0 ,]
+data$MAF.y <- ifelse(data$eaf<0.5,data$eaf,1-data$eaf)
+data1 = data[,c("Effect","VAR.x","chr_pos")]
+data2 = data[,c("beta.y","VAR.y","chr_pos",'MAF.y','n_offBW')]
+colnames(data1)=c("beta","varbeta","snp")
+colnames(data2)=c("beta","varbeta","snp",'MAF','N')
+data1 = as.list(data1)
+data2 = as.list(data2)
+data1$type = "cc"
+data2$type = "quant"
+res = coloc.abf(data1,data2,p1=1e-4,p2=1e-4,p12=1e-5)
+result_coloc[i,'SNP']<-SNPs[i,'SNP']
+result_coloc[i,'PP.H0']<-res$summary[2]
+result_coloc[i,'PP.H1']<-res$summary[3]
+result_coloc[i,'PP.H2']<-res$summary[4]
+result_coloc[i,'PP.H3']<-res$summary[5]
+result_coloc[i,'PP.H4']<-res$summary[6]
+}
+
   
 
 
