@@ -73,13 +73,13 @@ dat<- harmonise_data(
 
 dat$r2.exposure<-(get_r_from_bsen(dat$beta.exposure,dat$se.exposure,751754))^2
 dat$F.exposure<-(751754-2)*dat$r2.exposure/(1-dat$r2.exposure)
-dat<-subset(dat, F.exposure>10) # filter weak instrumental variables
+dat<-subset(dat, F.exposure>10) # filter out weak instrumental variables
 
   result_MR[n,'exposure']<-'obesity'
   result_MR[n,'outcome']<-'NG2019_BW_MA_EF_EUR'
   res <- mr(dat) #MR results
   res<-generate_odds_ratios(res)
-  #MR-egger
+  #MR-Egger
   result_MR[n,'Egger_b']<-res[1,7]
   result_MR[n,'Egger_se']<-res[1,8]
   result_MR[n,'Egger_p']<-res[1,9]
