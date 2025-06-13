@@ -1,4 +1,5 @@
-#This is the codes for two-sample Mendelian randomization analyses for the causal effects of T2D-related pathways, insulin secretion and insulin sensitivity on birth weight.
+#This is the codes for two-sample Mendelian randomization and colocalization analyses for 
+#the causal effects of T2D-related pathways, insulin secretion and insulin sensitivity on birth weight.
 
 library(TwoSampleMR)
 library(LDlinkR)
