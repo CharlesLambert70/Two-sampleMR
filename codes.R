@@ -43,7 +43,7 @@ for (i in missing$SNP){
   }
   proxy<-subset(proxy1,Distance==min(abs(proxy1$Distance)) | Distance==-min(abs(proxy1$Distance))) #find the closest SNP with highest R2 as the proxy SNP
   #add the proxy SNP into the exposure data
-  exposure_data[m+1,'SNP']=proxy[1,'RS_Number']
+  exposure_data[m+1,'SNP']=proxy[1,'RSID']
   exposure_data[m+1,'effect_allele']=toupper(subset(NG2019_BW_MA_EUR,RSID==i)$ea)
   exposure_data[m+1,'other_allele']=toupper(subset(NG2019_BW_MA_EUR,RSID==i)$nea)
   exposure_data[m+1,'beta']=subset(exposure_data,SNP==i)$beta
@@ -110,12 +110,7 @@ dat<-subset(dat, F.exposure>10) # filter weak instrumental variables
   result_MR[n,'presso_low']<-res_presso[[1]]$'Main MR results'[1,3]-1.96*res_presso[[1]]$'Main MR results'[1,4]
   result_MR[n,'presso_up']<-res_presso[[1]]$'Main MR results'[1,3]+1.96*res_presso[[1]]$'Main MR results'[1,4]
 
-  #heterogeneity
-
-  result_MR[n,'presso_global_RSSobs']<-res_presso[[1]][["MR-PRESSO results"]][["Global Test"]][["RSSobs"]]
-  result_MR[n,'presso_global_p']<-res_presso[[1]][["MR-PRESSO results"]][["Global Test"]][["Pvalue"]]
-
-
+  #heterogeneity test
   het<-mr_heterogeneity(dat)
   result_MR[n,'Egger_HET_Q']<-het[1,6]
   result_MR[n,'Egger_HET_Q_df']<-het[1,7]
@@ -125,8 +120,23 @@ dat<-subset(dat, F.exposure>10) # filter weak instrumental variables
   result_MR[n,'IVW_HET_Q_df']<-het[2,7]
   result_MR[n,'IVW_HET_pvalue']<-het[2,8]
 
+  # horizontal pleiotropy test
   hplei<-mr_pleiotropy_test(dat)
   result_MR[n,'Egger_intercept']<-hplei[1,5]
   result_MR[n,'Egger_intercept_se']<-hplei[1,6]
   result_MR[n,'Egger_intercept_pvalue']<-hplei[1,7]
+
+  result_MR[n,'presso_global_RSSobs']<-res_presso[[1]][["MR-PRESSO results"]][["Global Test"]][["RSSobs"]]
+  result_MR[n,'presso_global_p']<-res_presso[[1]][["MR-PRESSO results"]][["Global Test"]][["Pvalue"]]
+
+  #leave-one-out test
+  res_loo <- mr_leaveoneout(dat)
+  mr_leaveoneout_plot(res_loo)
+
+  #scatterplot
+  res <- mr(dat)
+  mr_scatter_plot(res, dat)
+  
+
+
 
