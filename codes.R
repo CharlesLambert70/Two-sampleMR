@@ -103,7 +103,7 @@ dat<-subset(dat, F.exposure>10) # filter weak instrumental variables
   result_MR[n,'WMode_low']<-res[5,10]
   result_MR[n,'WMode_up']<-res[5,11]
   #MR-PRESSO
-  res_presso<-run_mr_presso(dat,NbDistribution = 1000)
+  res_presso<-run_mr_presso(dat)
   result_MR[n,'presso_b']<-res_presso[[1]]$'Main MR results'[1,3]
   result_MR[n,'presso_se']<-res_presso[[1]]$'Main MR results'[1,4]
   result_MR[n,'presso_p']<-res_presso[[1]]$'Main MR results'[1,6]
