@@ -43,9 +43,10 @@ for (i in missing$SNP){
   }
   proxy<-subset(proxy1,Distance==min(abs(proxy1$Distance)) | Distance==-min(abs(proxy1$Distance))) #find the closest SNP with highest R2 as the proxy SNP
   #add the proxy SNP into the exposure data
-  exposure_data[m+1,'SNP']=proxy[1,'RSID']
-  exposure_data[m+1,'effect_allele']=toupper(subset(NG2019_BW_MA_EUR,RSID==i)$ea)
-  exposure_data[m+1,'other_allele']=toupper(subset(NG2019_BW_MA_EUR,RSID==i)$nea)
+  proxy_snp<-proxy[1,'RS_Number']
+  exposure_data[m+1,'SNP']=proxy_snp
+  exposure_data[m+1,'effect_allele']=toupper(subset(NG2019_BW_MA_FE_EUR,RSID==proxy_snp)$ea)
+  exposure_data[m+1,'other_allele']=toupper(subset(NG2019_BW_MA_FE_EUR,RSID==proxy_snp)$nea)
   exposure_data[m+1,'beta']=subset(exposure_data,SNP==i)$beta
   exposure_data[m+1,'se']=subset(exposure_data,SNP==i)$se
   exposure_data[m+1,'pval']=subset(exposure_data,SNP==i)$pval
